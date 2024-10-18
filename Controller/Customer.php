@@ -11,7 +11,7 @@ use Webkul\UVDesk\CoreFrameworkBundle\Form\UserProfile;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Webkul\UVDesk\CoreFrameworkBundle\Utils\TokenGenerator;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
-use Symfony\Component\Security\Core\Encoder\UserPasswordEncoderInterface;
+use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 use Webkul\UVDesk\CoreFrameworkBundle\FileSystem\FileSystem;
 use Symfony\Contracts\Translation\TranslatorInterface;
 use Webkul\UVDesk\CoreFrameworkBundle\Services\FileUploadService;
@@ -21,14 +21,14 @@ Class Customer extends AbstractController
 {
     private $translator;
     private $fileSystem;
-    private $passwordEncoder;
+    private $passwordHasher;
     private $fileUploadService;
 
-    public function __construct(TranslatorInterface $translator, UserPasswordEncoderInterface $passwordEncoder, FileSystem $fileSystem, FileUploadService $fileUploadService)
+    public function __construct(TranslatorInterface $translator, UserPasswordHasherInterface $passwordHasher, FileSystem $fileSystem, FileUploadService $fileUploadService)
     {
         $this->translator = $translator;
         $this->fileSystem = $fileSystem;
-        $this->passwordEncoder = $passwordEncoder;
+        $this->passwordHasher = $passwordHasher;
         $this->fileUploadService = $fileUploadService;
     }
 
@@ -153,7 +153,7 @@ Class Customer extends AbstractController
 
                 if ($form->isValid()) {
                     if ($data != null && (!empty($data['password']['first']))) {
-                        $encodedPassword = $this->passwordEncoder->encodePassword($user, $data['password']['first']);
+                        $encodedPassword = $this->passwordHasher->hashPassword($user, $data['password']['first']);
 
                         if (!empty($encodedPassword) ) {
                             $user->setPassword($encodedPassword);
